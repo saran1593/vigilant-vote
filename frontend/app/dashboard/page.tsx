@@ -46,17 +46,17 @@ export default function VoterDashboard() {
     e.preventDefault();
     setLoading(true);
     try {
-      // 1. Encrypt Content
+      
       const encryptedContent = encryptData(form.content);
 
-      // 2. Prepare FormData (for file upload)
+      
       const formData = new FormData();
       formData.append('category', form.category);
       formData.append('encryptedContent', encryptedContent);
       formData.append('location', JSON.stringify({
         district: form.district,
         boothNumber: form.boothNumber,
-        lat: 12.9716 + (Math.random() - 0.5) * 0.1, // Mock coordinates for heatmap
+        lat: 12.9716 + (Math.random() - 0.5) * 0.1, 
         lng: 77.5946 + (Math.random() - 0.5) * 0.1
       }));
       if (evidence) formData.append('evidence', evidence);

@@ -15,8 +15,8 @@ const requestOTP = async (email, fingerprint) => {
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   user.otp = otp;
-  user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
-  user.browserFingerprint = fingerprint || null; // Optional binding
+  user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000); 
+  user.browserFingerprint = fingerprint || null; 
   await user.save();
 
   try {
@@ -35,7 +35,7 @@ const verifyOTP = async (email, otp, currentFingerprint) => {
   if (user.otp !== otp) return { success: false, message: 'Invalid OTP' };
   if (user.otpExpiry < new Date()) return { success: false, message: 'OTP expired' };
 
-  // Check fingerprint if it was bound during request
+  
   if (user.browserFingerprint && user.browserFingerprint !== currentFingerprint) {
     user.otp = null;
     user.otpExpiry = null;
@@ -60,7 +60,7 @@ const verifyOTP = async (email, otp, currentFingerprint) => {
 const bcrypt = require('bcrypt');
 
 const loginWithPassword = async (email, password) => {
-  // Hardcoded Superadmin Check (as fallback/seed/update)
+  
   if (email === 'superadmin@vigilant.com' && password === 'superadmin@321') {
     let user = await User.findOne({ email });
     if (!user) {
@@ -73,7 +73,7 @@ const loginWithPassword = async (email, password) => {
       });
       await user.save();
     } else if (!user.password) {
-      // Update existing user if password is missing
+      
       user.password = await bcrypt.hash(password, 10);
       user.role = 'superadmin';
       await user.save();
@@ -103,7 +103,7 @@ const loginWithPassword = async (email, password) => {
 };
 
 const verifyPassword = async (email, password) => {
-  // Hardcoded fallback for Superadmin verification
+  
   if (email === 'superadmin@vigilant.com' && password === 'superadmin@321') {
     return { success: true, message: 'Password verified' };
   }

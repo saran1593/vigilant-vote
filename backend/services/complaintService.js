@@ -29,7 +29,7 @@ const getComplaintsForUser = async (voterId) => {
 const getAllComplaints = async (filters = {}) => {
   const complaints = await Complaint.find(filters).populate('assignedTo', 'email').sort({ createdAt: -1 });
   
-  // Verify integrity of each complaint
+  
   return complaints.map(c => {
     const isCompromised = !verifyChecksum(c.encryptedContent, c.checksum);
     return { ...c.toObject(), isCompromised };

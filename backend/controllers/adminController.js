@@ -28,7 +28,7 @@ const getHeatmapData = async (req, res) => {
     const heatmap = complaints.map(c => ({
       lat: c.location.lat,
       lng: c.location.lng,
-      intensity: 1 // For simple heatmap, or scale by severity
+      intensity: 1 
     })).filter(h => h.lat && h.lng);
     res.json(heatmap);
   } catch (error) {
@@ -38,7 +38,7 @@ const getHeatmapData = async (req, res) => {
 
 const manageAdmins = async (req, res) => {
   try {
-    const { email, action, password } = req.body; // action: 'add' or 'remove'
+    const { email, action, password } = req.body; 
     const role = action === 'add' ? 'admin' : 'user';
     
     let updateData = { role };
@@ -49,10 +49,10 @@ const manageAdmins = async (req, res) => {
     const user = await User.findOneAndUpdate(
       { email },
       updateData,
-      { returnDocument: 'after', upsert: action === 'add' } // Create if doesn't exist when adding
+      { returnDocument: 'after', upsert: action === 'add' } 
     );
 
-    // If upserted, ensure userId is set
+    
     if (action === 'add' && !user.userId) {
       const { v4: uuidv4 } = require('uuid');
       user.userId = uuidv4();

@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useEffect } from 'react';
 
-// Fix Leaflet marker icon issue
+
 const DefaultIcon = L.icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -16,7 +16,7 @@ const DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 export default function Heatmap({ data }: { data: any[] }) {
-  // Aggregate complaints by location to show intensity
+  
   const hotspots = data.reduce((acc: any, curr: any) => {
     const key = `${curr.location.lat},${curr.location.lng}`;
     if (!acc[key]) {

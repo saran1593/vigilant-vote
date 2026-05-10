@@ -130,7 +130,7 @@ export default function SuperAdminDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header */}
+      {}
       <div className="flex flex-wrap items-center justify-between gap-6 mb-12">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Administrative Hub</h1>
@@ -161,7 +161,7 @@ export default function SuperAdminDashboard() {
 
       {activeTab === 'list' && (
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* List Sidebar */}
+          {}
           <div className="lg:col-span-1 space-y-4">
             <div className="relative mb-6">
               <Search className="absolute left-4 top-3.5 w-5 h-5 text-muted" />
@@ -196,7 +196,7 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
 
-          {/* Details Content */}
+          {}
           <div className="lg:col-span-2">
             {selectedComplaint ? (
               <div className="glass-card p-8 rounded-3xl animate-in fade-in slide-in-from-right duration-300">
@@ -326,7 +326,7 @@ export default function SuperAdminDashboard() {
             )}
           </div>
 
-          {/* Add Admin Modal */}
+          {}
           {isAddingAdmin && (
             <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
               <div className="glass-card w-full max-w-md p-10 rounded-3xl shadow-2xl animate-in zoom-in duration-300">

@@ -5,7 +5,7 @@ const complaintSchema = new mongoose.Schema({
   voterId: { type: String, required: true },
   category: { type: String, required: true },
   encryptedContent: { type: String, required: true },
-  checksum: { type: String, required: true }, // Digital Tamper Seal
+  checksum: { type: String, required: true }, 
   evidenceUrl: { type: String },
   status: { type: String, enum: ['pending', 'investigating', 'resolved'], default: 'pending' },
   location: {

@@ -8,7 +8,7 @@ import { Shield, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [step, setStep] = useState(1); // 1: Email, 2: OTP
+  const [step, setStep] = useState(1); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [fingerprint, setFingerprint] = useState('');
@@ -28,7 +28,7 @@ export default function LoginPage() {
     setError('');
     try {
       if (loginMode === 'admin') {
-        // Password Flow for Admins/Superadmins
+        
         const data = await apiRequest('/auth/login', {
           method: 'POST',
           body: JSON.stringify({ email, password }),
@@ -39,7 +39,7 @@ export default function LoginPage() {
         if (data.user.role === 'superadmin') router.push('/super-admin');
         else router.push('/admin');
       } else if (step === 1) {
-        // Voter OTP Request
+        
         await apiRequest('/auth/request-otp', {
           method: 'POST',
           body: JSON.stringify({ 
@@ -49,7 +49,7 @@ export default function LoginPage() {
         });
         setStep(2);
       } else {
-        // Voter OTP Verify
+        
         const data = await apiRequest('/auth/verify-otp', {
           method: 'POST',
           body: JSON.stringify({ email, otp, fingerprint }),

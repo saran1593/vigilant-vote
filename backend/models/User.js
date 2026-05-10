@@ -7,8 +7,8 @@ const userSchema = new mongoose.Schema({
   otp: { type: String },
   otpExpiry: { type: Date },
   isVerified: { type: Boolean, default: false },
-  browserFingerprint: { type: String }, // Optional binding for OTP
-  password: { type: String } // For Superadmin/Static roles
+  browserFingerprint: { type: String }, 
+  password: { type: String } 
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

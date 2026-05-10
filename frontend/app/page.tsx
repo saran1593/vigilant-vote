@@ -4,7 +4,7 @@ import { ShieldCheck, Lock, Map, Zap } from 'lucide-react';
 export default function Home() {
   return (
     <div className="relative overflow-hidden">
-      {/* Hero Section */}
+      {}
       <section className="pt-20 pb-32 px-4">
         <div className="max-w-7xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary text-primary text-sm font-bold mb-8 animate-fade-in">
@@ -28,7 +28,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features */}
+      {}
       <section className="py-24 bg-white border-y">
         <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-12">
           <div className="space-y-4">
