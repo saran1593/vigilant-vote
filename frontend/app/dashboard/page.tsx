@@ -11,7 +11,9 @@ import {
   CheckCircle2, 
   Clock, 
   AlertCircle,
-  Plus
+  Plus,
+  ShieldCheck,
+  X
 } from 'lucide-react';
 
 export default function VoterDashboard() {
@@ -46,10 +48,8 @@ export default function VoterDashboard() {
     e.preventDefault();
     setLoading(true);
     try {
-      
       const encryptedContent = encryptData(form.content);
 
-      
       const formData = new FormData();
       formData.append('category', form.category);
       formData.append('encryptedContent', encryptedContent);
@@ -85,150 +85,166 @@ export default function VoterDashboard() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'resolved': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
-      case 'investigating': return <Clock className="w-4 h-4 text-amber-500" />;
+      case 'resolved': return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
+      case 'investigating': return <Clock className="w-4 h-4 text-amber-400" />;
       default: return <AlertCircle className="w-4 h-4 text-slate-400" />;
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
-      <div className="flex justify-between items-end mb-12">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Your Grievances</h1>
-          <p className="text-muted mt-2">Track the status of your reported election irregularities.</p>
-        </div>
-        <button 
-          onClick={() => setShowForm(!showForm)}
-          className="bg-primary text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-all shadow-lg shadow-primary/20"
-        >
-          {showForm ? 'Cancel' : <><Plus className="w-5 h-5" /> File New Complaint</>}
-        </button>
-      </div>
+    <div 
+      className="relative min-h-[calc(100vh-64px)] w-full py-10 px-4 sm:px-6 lg:px-8 bg-cover bg-center bg-no-repeat bg-fixed text-white"
+      style={{ backgroundImage: "url('/dashboard.jpg')" }}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/80 to-blue-950/90 backdrop-blur-[3px]" />
 
-      {showForm && (
-        <div className="glass-card p-8 rounded-3xl mb-12 animate-in slide-in-from-top duration-500">
-          <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold mb-2">Grievance Category</label>
-                <select 
-                  className="w-full p-4 rounded-xl border border-border bg-slate-50 focus:ring-2 focus:ring-primary/20 outline-none"
-                  value={form.category}
-                  onChange={(e) => setForm({...form, category: e.target.value})}
+      <div className="relative z-10 max-w-6xl mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10 pb-6 border-b border-white/15">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-white">
+              My Complaints
+            </h1>
+            <p className="text-slate-300 text-sm mt-1">View and track your submitted election grievances.</p>
+          </div>
+          <button 
+            onClick={() => setShowForm(!showForm)}
+            className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all shadow-lg text-sm"
+          >
+            {showForm ? <><X className="w-4 h-4" /> Cancel</> : <><Plus className="w-4 h-4" /> File New Complaint</>}
+          </button>
+        </div>
+
+        {showForm && (
+          <div className="bg-slate-900/70 backdrop-blur-xl border border-white/20 p-8 rounded-2xl mb-10 shadow-xl">
+            <h3 className="text-lg font-bold mb-6 text-white flex items-center gap-2">
+              <FileText className="w-5 h-5 text-blue-400" /> Submit New Complaint
+            </h3>
+            <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Category</label>
+                  <select 
+                    className="w-full p-3 rounded-xl border border-white/15 bg-slate-950/70 text-white focus:ring-2 focus:ring-blue-400/40 outline-none text-sm"
+                    value={form.category}
+                    onChange={(e) => setForm({...form, category: e.target.value})}
+                  >
+                    <option className="bg-slate-900 text-white">Booth Capturing</option>
+                    <option className="bg-slate-900 text-white">Voter Intimidation</option>
+                    <option className="bg-slate-900 text-white">Malfunctioning EVM</option>
+                    <option className="bg-slate-900 text-white">Illegal Campaigning</option>
+                    <option className="bg-slate-900 text-white">Other</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">District</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-3 rounded-xl border border-white/15 bg-slate-950/70 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-400/40 outline-none text-sm"
+                      placeholder="e.g. Kanyakumari"
+                      value={form.district}
+                      onChange={(e) => setForm({...form, district: e.target.value})}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Booth Number</label>
+                    <input 
+                      type="text" 
+                      className="w-full p-3 rounded-xl border border-white/15 bg-slate-950/70 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-400/40 outline-none text-sm"
+                      placeholder="e.g. 101"
+                      value={form.boothNumber}
+                      onChange={(e) => setForm({...form, boothNumber: e.target.value})}
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Evidence (Optional)</label>
+                  <div className="relative group">
+                    <input 
+                      type="file" 
+                      className="absolute inset-0 opacity-0 cursor-pointer z-10"
+                      onChange={(e) => setEvidence(e.target.files?.[0] || null)}
+                    />
+                    <div className="border border-dashed border-white/20 p-6 rounded-xl flex flex-col items-center justify-center gap-2 bg-slate-950/40 hover:border-blue-400 transition-all">
+                      <Camera className="w-6 h-6 text-slate-400 group-hover:text-blue-400 transition-colors" />
+                      <span className="text-xs text-slate-300">{evidence ? evidence.name : 'Upload photo or document'}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 flex flex-col">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Description</label>
+                  <textarea 
+                    className="w-full h-full min-h-[160px] p-4 rounded-xl border border-white/15 bg-slate-950/70 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-400/40 outline-none resize-none text-sm"
+                    placeholder="Describe what happened..."
+                    value={form.content}
+                    onChange={(e) => setForm({...form, content: e.target.value})}
+                    required
+                  />
+                </div>
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all border border-white/10 disabled:opacity-50"
                 >
-                  <option>Booth Capturing</option>
-                  <option>Voter Intimidation</option>
-                  <option>Malfunctioning EVM</option>
-                  <option>Illegal Campaigning</option>
-                  <option>Other</option>
-                </select>
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Send className="w-4 h-4" /> Submit Complaint</>}
+                </button>
               </div>
+            </form>
+          </div>
+        )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold mb-2">District</label>
-                  <input 
-                    type="text" 
-                    className="w-full p-4 rounded-xl border border-border bg-slate-50 focus:ring-2 focus:ring-primary/20 outline-none"
-                    placeholder="e.g. North Shore"
-                    value={form.district}
-                    onChange={(e) => setForm({...form, district: e.target.value})}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold mb-2">Booth #</label>
-                  <input 
-                    type="text" 
-                    className="w-full p-4 rounded-xl border border-border bg-slate-50 focus:ring-2 focus:ring-primary/20 outline-none"
-                    placeholder="e.g. 101"
-                    value={form.boothNumber}
-                    onChange={(e) => setForm({...form, boothNumber: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold mb-2">Evidence (Image/PDF)</label>
-                <div className="relative group">
-                  <input 
-                    type="file" 
-                    className="absolute inset-0 opacity-0 cursor-pointer z-10"
-                    onChange={(e) => setEvidence(e.target.files?.[0] || null)}
-                  />
-                  <div className="border-2 border-dashed border-border group-hover:border-primary transition-all p-8 rounded-2xl flex flex-col items-center justify-center gap-2 bg-slate-50/50">
-                    <Camera className="w-8 h-8 text-muted group-hover:text-primary" />
-                    <span className="text-sm font-medium">{evidence ? evidence.name : 'Click to upload evidence'}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-6 flex flex-col">
-              <div className="flex-1">
-                <label className="block text-sm font-bold mb-2">Detailed Description (Encrypted)</label>
-                <textarea 
-                  className="w-full h-full min-h-[200px] p-6 rounded-2xl border border-border bg-slate-50 focus:ring-2 focus:ring-primary/20 outline-none resize-none"
-                  placeholder="Describe the incident in detail..."
-                  value={form.content}
-                  onChange={(e) => setForm({...form, content: e.target.value})}
-                  required
-                />
-              </div>
-              <button 
-                type="submit"
-                disabled={loading}
-                className="w-full py-5 blue-gradient text-white rounded-2xl font-extrabold text-lg flex items-center justify-center gap-2 shadow-xl shadow-primary/20 hover:opacity-95 transition-all disabled:opacity-50"
+        {fetching ? (
+          <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 animate-spin text-blue-400" /></div>
+        ) : complaints.length === 0 ? (
+          <div className="text-center py-20 bg-slate-900/50 backdrop-blur-xl border border-white/15 rounded-[2.5rem] shadow-2xl">
+            <FileText className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white">No complaints filed</h3>
+            <p className="text-slate-300 text-sm mt-1">You haven't filed any grievances yet. Click above to start.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {complaints.map((c: any) => (
+              <div 
+                key={c.complaintId} 
+                className="bg-slate-900/60 backdrop-blur-xl border border-white/15 p-6 rounded-2xl flex flex-wrap items-center justify-between gap-6 hover:border-white/30 hover:bg-slate-900/80 transition-all duration-300 shadow-xl"
               >
-                {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Send className="w-5 h-5" /> Submit Encrypted Grievance</>}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {fetching ? (
-        <div className="flex justify-center py-20"><Loader2 className="w-10 h-10 animate-spin text-primary" /></div>
-      ) : complaints.length === 0 ? (
-        <div className="text-center py-20 glass-card rounded-3xl">
-          <FileText className="w-16 h-16 text-muted mx-auto mb-4" />
-          <h3 className="text-xl font-bold">No complaints yet</h3>
-          <p className="text-muted">You haven't filed any grievances yet. Click above to start.</p>
-        </div>
-      ) : (
-        <div className="grid gap-4">
-          {complaints.map((c: any) => (
-            <div key={c.complaintId} className="glass-card p-6 rounded-2xl flex flex-wrap items-center justify-between gap-6 hover:shadow-md transition-all">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center text-primary">
-                  <FileText className="w-6 h-6" />
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg text-white">{c.category}</h4>
+                    <div className="flex items-center gap-3 text-xs text-slate-300 mt-1">
+                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-blue-400" /> District {c.location.district}, Booth {c.location.boothNumber}</span>
+                      <span>•</span>
+                      <span>{new Date(c.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-lg">{c.category}</h4>
-                  <div className="flex items-center gap-3 text-sm text-muted mt-0.5">
-                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> District {c.location.district}, Booth {c.location.boothNumber}</span>
-                    <span>•</span>
-                    <span>{new Date(c.createdAt).toLocaleDateString()}</span>
+
+                <div className="flex items-center gap-4">
+                  <div className={`px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 border backdrop-blur-md ${
+                    c.status === 'resolved' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
+                    c.status === 'investigating' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' :
+                    'bg-slate-800/60 text-slate-300 border-white/15'
+                  }`}>
+                    {getStatusIcon(c.status)}
+                    <span className="capitalize">{c.status}</span>
                   </div>
                 </div>
               </div>
-
-              <div className="flex items-center gap-4">
-                <div className={`px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 border ${
-                  c.status === 'resolved' ? 'bg-green-50 text-green-700 border-green-100' :
-                  c.status === 'investigating' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                  'bg-slate-50 text-slate-700 border-slate-100'
-                }`}>
-                  {getStatusIcon(c.status)}
-                  <span className="capitalize">{c.status}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+
