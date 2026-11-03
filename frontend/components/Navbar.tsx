@@ -2,19 +2,25 @@
 import Link from 'next/link';
 import { Shield, LogOut, User as UserIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) setUser(JSON.parse(userData));
-  }, []);
+    try {
+      const userData = localStorage.getItem('user');
+      setUser(userData ? JSON.parse(userData) : null);
+    } catch {
+      setUser(null);
+    }
+  }, [pathname]);
 
   const handleLogout = () => {
     localStorage.clear();
+    setUser(null);
     router.push('/login');
   };
 
@@ -37,7 +43,7 @@ export default function Navbar() {
                     {user.role}
                   </span>
                 </div>
-                <button 
+                <button
                   onClick={handleLogout}
                   className="flex items-center gap-1 text-sm font-medium text-destructive hover:opacity-80 transition-all"
                 >
@@ -46,7 +52,7 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <Link 
+              <Link
                 href="/login"
                 className="bg-primary text-white px-5 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-all"
               >

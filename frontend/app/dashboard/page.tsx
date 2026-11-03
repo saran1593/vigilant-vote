@@ -2,22 +2,26 @@
 import { useState, useEffect } from 'react';
 import { apiRequest } from '@/utils/api';
 import { encryptData } from '@/utils/crypto';
-import { 
-  FileText, 
-  MapPin, 
-  Camera, 
-  Send, 
-  Loader2, 
-  CheckCircle2, 
-  Clock, 
+import { DISTRICTS } from '@/utils/districts';
+import VoterIdGate from '../../components/VoterIdGate';
+import {
+  FileText,
+  MapPin,
+  Camera,
+  Send,
+  Loader2,
+  CheckCircle2,
+  Clock,
   AlertCircle,
   Plus,
-  ShieldCheck,
+  XCircle,
   X
 } from 'lucide-react';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
 export default function VoterDashboard() {
-  const [complaints, setComplaints] = useState([]);
+  const [complaints, setComplaints] = useState<any[]>([]);
   const [form, setForm] = useState({
     category: 'Booth Capturing',
     content: '',
@@ -28,8 +32,15 @@ export default function VoterDashboard() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!token || userData.role !== 'user') {
+      window.location.href = '/login';
+      return;
+    }
     fetchComplaints();
   }, []);
 
@@ -55,23 +66,22 @@ export default function VoterDashboard() {
       formData.append('encryptedContent', encryptedContent);
       formData.append('location', JSON.stringify({
         district: form.district,
-        boothNumber: form.boothNumber,
-        lat: 12.9716 + (Math.random() - 0.5) * 0.1, 
-        lng: 77.5946 + (Math.random() - 0.5) * 0.1
+        boothNumber: form.boothNumber
       }));
       if (evidence) formData.append('evidence', evidence);
 
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/complaints', {
+      const response = await fetch(`${API_BASE}/complaints`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData
       });
 
-      if (!response.ok) throw new Error('Upload failed');
-      
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'Upload failed');
+      }
+
       setForm({ category: 'Booth Capturing', content: '', district: '', boothNumber: '' });
       setEvidence(null);
       setShowForm(false);
@@ -86,13 +96,21 @@ export default function VoterDashboard() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'resolved': return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
-      case 'investigating': return <Clock className="w-4 h-4 text-amber-400" />;
+      case 'rejected': return <XCircle className="w-4 h-4 text-rose-400" />;
+      case 'investigating':
+      case 'reviewing': return <Clock className="w-4 h-4 text-amber-400" />;
       default: return <AlertCircle className="w-4 h-4 text-slate-400" />;
     }
   };
 
+  const statusBadge = (status: string) =>
+    status === 'resolved' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
+    status === 'rejected' ? 'bg-rose-500/20 text-rose-300 border-rose-500/40' :
+    status === 'investigating' || status === 'reviewing' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' :
+    'bg-slate-800/60 text-slate-300 border-white/15';
+
   return (
-    <div 
+    <div
       className="relative min-h-[calc(100vh-64px)] w-full py-10 px-4 sm:px-6 lg:px-8 bg-cover bg-center bg-no-repeat bg-fixed text-white"
       style={{ backgroundImage: "url('/dashboard.jpg')" }}
     >
@@ -101,20 +119,21 @@ export default function VoterDashboard() {
       <div className="relative z-10 max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10 pb-6 border-b border-white/15">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-white">
-              My Complaints
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight text-white">My Complaints</h1>
             <p className="text-slate-300 text-sm mt-1">View and track your submitted election grievances.</p>
           </div>
-          <button 
+          <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all shadow-lg text-sm"
+            disabled={!verified}
+            className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-xl font-semibold flex items-center gap-2 transition-all shadow-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {showForm ? <><X className="w-4 h-4" /> Cancel</> : <><Plus className="w-4 h-4" /> File New Complaint</>}
           </button>
         </div>
 
-        {showForm && (
+        <VoterIdGate onChange={setVerified} />
+
+        {showForm && verified && (
           <div className="bg-slate-900/70 backdrop-blur-xl border border-white/20 p-8 rounded-2xl mb-10 shadow-xl">
             <h3 className="text-lg font-bold mb-6 text-white flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-400" /> Submit New Complaint
@@ -123,10 +142,10 @@ export default function VoterDashboard() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">Category</label>
-                  <select 
+                  <select
                     className="w-full p-3 rounded-xl border border-white/15 bg-slate-950/70 text-white focus:ring-2 focus:ring-blue-400/40 outline-none text-sm"
                     value={form.category}
-                    onChange={(e) => setForm({...form, category: e.target.value})}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
                   >
                     <option className="bg-slate-900 text-white">Booth Capturing</option>
                     <option className="bg-slate-900 text-white">Voter Intimidation</option>
@@ -139,23 +158,26 @@ export default function VoterDashboard() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1.5">District</label>
-                    <input 
-                      type="text" 
-                      className="w-full p-3 rounded-xl border border-white/15 bg-slate-950/70 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-400/40 outline-none text-sm"
-                      placeholder="e.g. Kanyakumari"
+                    <select
+                      className="w-full p-3 rounded-xl border border-white/15 bg-slate-950/70 text-white outline-none text-sm"
                       value={form.district}
-                      onChange={(e) => setForm({...form, district: e.target.value})}
+                      onChange={(e) => setForm({ ...form, district: e.target.value })}
                       required
-                    />
+                    >
+                      <option value="">Select district</option>
+                      {DISTRICTS.map((d) => (
+                        <option key={d} value={d} className="bg-slate-900 text-white">{d}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1.5">Booth Number</label>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       className="w-full p-3 rounded-xl border border-white/15 bg-slate-950/70 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-400/40 outline-none text-sm"
                       placeholder="e.g. 101"
                       value={form.boothNumber}
-                      onChange={(e) => setForm({...form, boothNumber: e.target.value})}
+                      onChange={(e) => setForm({ ...form, boothNumber: e.target.value })}
                       required
                     />
                   </div>
@@ -164,8 +186,9 @@ export default function VoterDashboard() {
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">Evidence (Optional)</label>
                   <div className="relative group">
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,application/pdf"
                       className="absolute inset-0 opacity-0 cursor-pointer z-10"
                       onChange={(e) => setEvidence(e.target.files?.[0] || null)}
                     />
@@ -180,15 +203,15 @@ export default function VoterDashboard() {
               <div className="space-y-4 flex flex-col">
                 <div className="flex-1">
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">Description</label>
-                  <textarea 
+                  <textarea
                     className="w-full h-full min-h-[160px] p-4 rounded-xl border border-white/15 bg-slate-950/70 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-400/40 outline-none resize-none text-sm"
                     placeholder="Describe what happened..."
                     value={form.content}
-                    onChange={(e) => setForm({...form, content: e.target.value})}
+                    onChange={(e) => setForm({ ...form, content: e.target.value })}
                     required
                   />
                 </div>
-                <button 
+                <button
                   type="submit"
                   disabled={loading}
                   className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all border border-white/10 disabled:opacity-50"
@@ -211,8 +234,8 @@ export default function VoterDashboard() {
         ) : (
           <div className="grid gap-4">
             {complaints.map((c: any) => (
-              <div 
-                key={c.complaintId} 
+              <div
+                key={c.complaintId}
                 className="bg-slate-900/60 backdrop-blur-xl border border-white/15 p-6 rounded-2xl flex flex-wrap items-center justify-between gap-6 hover:border-white/30 hover:bg-slate-900/80 transition-all duration-300 shadow-xl"
               >
                 <div className="flex items-center gap-4">
@@ -222,22 +245,16 @@ export default function VoterDashboard() {
                   <div>
                     <h4 className="font-bold text-lg text-white">{c.category}</h4>
                     <div className="flex items-center gap-3 text-xs text-slate-300 mt-1">
-                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-blue-400" /> District {c.location.district}, Booth {c.location.boothNumber}</span>
+                      <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-blue-400" /> {c.location.district}, {c.location.boothNumber}</span>
                       <span>•</span>
                       <span>{new Date(c.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <div className={`px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 border backdrop-blur-md ${
-                    c.status === 'resolved' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' :
-                    c.status === 'investigating' ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' :
-                    'bg-slate-800/60 text-slate-300 border-white/15'
-                  }`}>
-                    {getStatusIcon(c.status)}
-                    <span className="capitalize">{c.status}</span>
-                  </div>
+                <div className={`px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 border backdrop-blur-md ${statusBadge(c.status)}`}>
+                  {getStatusIcon(c.status)}
+                  <span className="capitalize">{c.status}</span>
                 </div>
               </div>
             ))}
@@ -247,4 +264,3 @@ export default function VoterDashboard() {
     </div>
   );
 }
-
